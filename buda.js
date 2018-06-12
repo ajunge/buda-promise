@@ -1,7 +1,7 @@
 var querystring = require("querystring");
 var requestPromise = require('request-promise');
 var _ = require('underscore');
-var crypto = require('crypto');
+var CryptoJS = require('crypto-js');
 var Promise = require('bluebird');
 
 _.mixin({
@@ -22,7 +22,7 @@ var Buda = function(api_key, api_secret) {
   _.bindAll.apply(_, [this].concat(_.functions(this)));
 }
 
-Buda.prototype._request = function(method, path, data, args) {
+Buda.prototype._request = function(method, path, data, args, auth=false) {
     var options = {
       uri: 'https://www.buda.com' + path,
       method: method,
@@ -33,10 +33,18 @@ Buda.prototype._request = function(method, path, data, args) {
       resolveWithFullResponse: true,
     };
   
+    //Maybe if data!==null
     if (method === 'post') {
       options.form = data;
     }
   
+    if(auth){
+        var authHeader=this._authHeader(method,path, data)
+        options.headers =Object.assign(options.headers, authHeader);
+    }
+
+    console.log(options);
+
     return requestPromise(options)
       .then(function(res) {
         return JSON.parse(res.body);
@@ -71,18 +79,37 @@ Buda.prototype._request = function(method, path, data, args) {
           this.nonceIncr < 1000 ?  '0' : '';
     return now + padding + this.nonceIncr;
   }
+
+  Buda.prototype._authHeader = function(method, path, body){
+    var nonce = this._generateNonce();
+    var message;
+    if(body){
+      var rawBody=JSON.stringify(body)
+      var base64_encoded_body=Buffer.from(rawBody).toString('base64')
+      message=method+' '+this.endpoint+uri+' '+base64_encoded_body+' '+nonce
+    }else{
+      message=method.toUpperCase()+' '+path+' '+nonce
+    }
+
+    var signature=CryptoJS.HmacSHA384(message, this.api_secret).toString();
+
+    return {
+        'X-SBTC-APIKEY': this.api_key,
+        'X-SBTC-NONCE': nonce,
+        'X-SBTC-SIGNATURE': signature
+    };
+
+  }
+
   
-  Buda.prototype._get = function(market, action, args) {
+  Buda.prototype._get = function(endpoint, args, auth=false) {
     args = _.compactObject(args);
   
-    if(market)
-      var path = '/api/v2/markets/' + market + '/' + action;
-    else
-      var path = '/api/v2/' + action;
+    var path = '/api/v2' + endpoint;
   
     path += (querystring.stringify(args) === '' ? '' : '?') + querystring.stringify(args);
     console.log(path)
-    return this._request('get', path, undefined, args)
+    return this._request('get', path, undefined, args, auth)
   }
   
   Buda.prototype._post = function(market, action, args, legacy_endpoint) {
@@ -98,41 +125,43 @@ Buda.prototype._request = function(method, path, data, args) {
         var path = '/api/v2/' + action + '/';
     }
   
-    var nonce = this._generateNonce();
-    var message = nonce + this.client_id + this.key;
-    var signer = crypto.createHmac('sha256', new Buffer(this.secret, 'utf8'));
-    var signature = signer.update(message).digest('hex').toUpperCase();
-  
-    args = _.extend({
-      key: this.key,
-      signature: signature,
-      nonce: nonce
-    }, args);
-  
     args = _.compactObject(args);
     var data = querystring.stringify(args);
   
     return this._request('post', path, data, args);
   }
   
-  //
-  // Public API
-  //
-  
-  Buda.prototype.ticker = function(market) {
-    return this._get(market, 'ticker');
-  }
-  
-  Buda.prototype.order_book = function(market) {
-    return this._get(market, 'order_book');
-  }
+//
+// Public API
+//
 
-  Buda.prototype.trades = function(market, timestamp) {
-    return this._get(market, 'trades', {timestamp: timestamp});
-  }
+Buda.prototype.ticker = function(market) {
+    return this._get('/markets/'+market+'/ticker');
+}
 
-  Buda.prototype.markets = function() {
-    return this._get(null, 'markets');
-  }
+Buda.prototype.order_book = function(market) {
+    return this._get('/markets/'+market+'/order_book');
+}
 
-  module.exports = Buda;
+Buda.prototype.trades = function(market, timestamp) {
+    return this._get('/markets/'+market+'/trades', {timestamp: timestamp});
+}
+
+Buda.prototype.markets = function() {
+    return this._get('/markets');
+}
+
+//
+// Private API
+// (you need to have key / secret / client ID set)
+//
+
+Buda.prototype.balances = function(currency) {
+  var curr='';
+  if(currency) curr='/'+currency;
+    return this._get('/balances'+curr, null, true);
+}
+
+
+
+module.exports = Buda;
