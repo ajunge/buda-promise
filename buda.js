@@ -1,7 +1,7 @@
 var querystring = require("querystring");
 var requestPromise = require('request-promise');
 var _ = require('underscore');
-var CryptoJS = require('crypto-js');
+var crypto = require('crypto');
 var Promise = require('bluebird');
 
 _.mixin({
@@ -92,7 +92,8 @@ Buda.prototype._request = function(method, path, args, data, auth=false) {
     }else{
       message=method+' '+path+' '+nonce
     }
-    var signature=CryptoJS.HmacSHA384(message, this.api_secret).toString();
+    var signature = crypto.createHmac('sha384', this.api_secret).update(message).digest('hex');
+
 
     return {
         'X-SBTC-APIKEY': this.api_key,
