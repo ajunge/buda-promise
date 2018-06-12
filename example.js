@@ -13,4 +13,15 @@ var privateBuda = new Buda(api_key, api_secret);
 
 //    commented out for your protection
 
-//privateBuda.balances('clp').then(function(result) { console.log(result) });
+//privateBuda.balance('clp').then(function(result) { console.log(result) });
+//privateBuda.order_pages('btc-clp').then(function(result) { console.log(result) });
+//privateBuda.new_order("btc-clp", "bid", "limit", 835875, 0.05).then(function(result) { console.log(result) }); //Parameter missing
+//privateBuda.cancel_order(3262406).then(function(result) { console.log(result) });
+//privateBuda.single_order(588).then(function(result) { console.log(result) });
+//privateBuda.deposits('clp').then(function(result) { console.log(result) });
+//privateBuda.withdrawals('clp').then(function(result) { console.log(result) });
+//privateBuda.withdrawal('btc',2.5,'mo366JJaDU5B1hmnPygyjQVMbUKnBC7DsY').then(function(result) { console.log(result) });  //Parameter missing
+//privateBuda.new_fiat_deposit('CLP', 250000).then(function(result) { console.log(result) });  //Parameter missing
+//privateBuda.new_crypto_address('BTC').then(function(result) { console.log(result) });
+//privateBuda.get_address('BTC',30216).then(function(result) { console.log(result) });
+//privateBuda.new_apikey('Mi nueva llave','1235487548.5541').then(function(result) { console.log(result) }); //Forbidden

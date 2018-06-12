@@ -22,41 +22,44 @@ var Buda = function(api_key, api_secret) {
   _.bindAll.apply(_, [this].concat(_.functions(this)));
 }
 
-Buda.prototype._request = function(method, path, data, args, auth=false) {
-    var options = {
-      uri: 'https://www.buda.com' + path,
-      method: method,
-      headers: {
-        'User-Agent': 'Mozilla/4.0 (compatible; buda-promise Node.js client)'
-      },
-      timeout: 5000,
-      resolveWithFullResponse: true,
-    };
-  
-    //Maybe if data!==null
-    if (method === 'post') {
-      options.form = data;
-    }
-  
-    if(auth){
-        var authHeader=this._authHeader(method,path, data)
-        options.headers =Object.assign(options.headers, authHeader);
-    }
+Buda.prototype._request = function(method, path, args, data, auth=false) {
+  var fullPath = path + (querystring.stringify(args) === '' ? '' : '?') + querystring.stringify(args);
 
-    console.log(options);
+  var options = {
+    uri: 'https://www.buda.com' + fullPath,
+    method: method,
+    headers: {
+      'User-Agent': 'Mozilla/4.0 (compatible; buda-promise Node.js client)',
+      'Content-Type': 'application/json'
+    },
+    timeout: 5000,
+    resolveWithFullResponse: true,
+  };
 
-    return requestPromise(options)
-      .then(function(res) {
-        return JSON.parse(res.body);
-      }).catch(function(err) {
-        let message;
-        if (err.name === 'StatusCodeError') {
-          message = 'Buda error ' + err.statusCode + ': ' + (err.statusCode === 404 ? 'Not found' : err.response.body);
-        } else {
-          message = 'Buda error: ' + err.message;
-        }
-        throw new Error(message);
-      });
+  if (data) {
+    options.form = data;
+  }
+  
+  if(auth){
+    if(!this.api_key || !this.api_secret)
+      return Promise.reject('Must provide api_key and api_secret to make this API request.');
+
+    var authHeader=this._authHeader(method,fullPath, data)
+    options.headers =Object.assign(options.headers, authHeader);
+  }
+
+  return requestPromise(options)
+    .then(function(res) {
+      return JSON.parse(res.body);
+    }).catch(function(err) {
+      let message;
+      if (err.name === 'StatusCodeError') {
+        message = 'Buda error ' + err.statusCode + ': ' + (err.statusCode === 404 ? 'Not found' : err.response.body);
+      } else {
+        message = 'Buda error: ' + err.message;
+      }
+      throw new Error(message);
+    });
   }
   
   // if you call new Date to fast it will generate
@@ -84,13 +87,11 @@ Buda.prototype._request = function(method, path, data, args, auth=false) {
     var nonce = this._generateNonce();
     var message;
     if(body){
-      var rawBody=JSON.stringify(body)
-      var base64_encoded_body=Buffer.from(rawBody).toString('base64')
-      message=method+' '+this.endpoint+uri+' '+base64_encoded_body+' '+nonce
+      var base64_encoded_body=Buffer.from(body).toString('base64')
+      message=method+' '+path+' '+base64_encoded_body+' '+nonce
     }else{
-      message=method.toUpperCase()+' '+path+' '+nonce
+      message=method+' '+path+' '+nonce
     }
-
     var signature=CryptoJS.HmacSHA384(message, this.api_secret).toString();
 
     return {
@@ -100,55 +101,29 @@ Buda.prototype._request = function(method, path, data, args, auth=false) {
     };
 
   }
-
-  
-  Buda.prototype._get = function(endpoint, args, auth=false) {
-    args = _.compactObject(args);
-  
-    var path = '/api/v2' + endpoint;
-  
-    path += (querystring.stringify(args) === '' ? '' : '?') + querystring.stringify(args);
-    console.log(path)
-    return this._request('get', path, undefined, args, auth)
-  }
-  
-  Buda.prototype._post = function(market, action, args, legacy_endpoint) {
-    if(!this.key || !this.secret || !this.client_id)
-      return Promise.reject('Must provide api_key and api_secret to make this API request.');
-  
-    if(legacy_endpoint)
-      var path = '/api/' + action + '/';
-    else {
-      if(market)
-        var path = '/api/v2/' + action + '/' + market + '/';
-      else
-        var path = '/api/v2/' + action + '/';
-    }
-  
-    args = _.compactObject(args);
-    var data = querystring.stringify(args);
-  
-    return this._request('post', path, data, args);
-  }
   
 //
 // Public API
 //
 
+// https://api.buda.com/#ticker
 Buda.prototype.ticker = function(market) {
-    return this._get('/markets/'+market+'/ticker');
+  return this._request('GET','/api/v2/markets/'+market+'/ticker');
 }
 
+// https://api.buda.com/#order-book
 Buda.prototype.order_book = function(market) {
-    return this._get('/markets/'+market+'/order_book');
+  return this._request('GET','/api/v2/markets/'+market+'/order_book');
 }
 
+// https://api.buda.com/#trades
 Buda.prototype.trades = function(market, timestamp) {
-    return this._get('/markets/'+market+'/trades', {timestamp: timestamp});
+  return this._request('GET','/api/v2/markets/'+market+'/trades',{timestamp: timestamp});
 }
 
+// https://api.buda.com/#markets
 Buda.prototype.markets = function() {
-    return this._get('/markets');
+  return this._request('GET','/api/v2/markets/');
 }
 
 //
@@ -156,12 +131,102 @@ Buda.prototype.markets = function() {
 // (you need to have key / secret / client ID set)
 //
 
-Buda.prototype.balances = function(currency) {
+// https://api.buda.com/#balances
+Buda.prototype.balance = function(currency) {
   var curr='';
   if(currency) curr='/'+currency;
-    return this._get('/balances'+curr, null, true);
+  return this._request('GET','/api/v2/balances'+curr,null,null,true);
 }
 
+// https://api.buda.com/#mis-rdenes
+Buda.prototype.order_pages = function(market, per, page, state, minimun_exchanged) {
+  var args={
+    per: per,
+    page: page,
+    state: state,
+    minimun_exchanged: minimun_exchanged
+  }
+  return this._request('GET','/api/v2/markets/'+market+'/orders',args,null,true);
+}
 
+// https://api.buda.com/#nueva-orden (ERROR "Parameter Missing ??")
+Buda.prototype.new_order = function(market, type, price_type, limit, amount) {
+  var payload={
+    order: {
+      type: type,
+      price_type: price_type,
+      limit: limit,
+      amount: amount
+    }
+  }
+  return this._request('POST','/api/v2/markets/'+market+'/orders',null,JSON.stringify(payload),true);
+}
+
+// https://api.buda.com/#cancelar-orden
+Buda.prototype.cancel_order = function(order_id) {
+  var payload={
+    state: "canceling"
+  }
+  return this._request('PUT','/api/v2/orders/'+order_id,null,JSON.stringify(payload),true);
+}
+
+// https://api.buda.com/#estado-de-la-orden
+Buda.prototype.single_order = function(order_id) {
+  return this._request('GET','/api/v2/orders/'+order_id,null,null,true);  
+
+}
+
+// https://api.buda.com/#historial-de-depositos-retiros
+Buda.prototype.deposits = function(currency) {
+  return this._request('GET','/api/v2/currencies/'+currency+'/deposits',null,null,true);
+}
+Buda.prototype.withdrawals = function(currency) {
+  return this._request('GET','/api/v2/currencies/'+currency+'/withdrawals',null,null,true);
+}
+
+// https://api.buda.com/#nuevo-retiro (ERROR: "Parameter missing??")
+Buda.prototype.withdrawal = function(currency, amount, target_address) {
+  var payload={
+    withdrawal: {
+      amount: amount,
+      currency: currency,
+      withdrawal_data: {
+        target_address: target_address
+      }
+    }
+  }
+  return this._request('POST','/api/v2/currencies/'+currency+'/withdrawals',null,JSON.stringify(payload),true);
+}
+
+// https://api.buda.com/#dep-sito-dinero-fiat (ERROR: "Parameter missing??")
+Buda.prototype.new_fiat_deposit = function(currency, amount) {
+  var payload={
+    deposit: {
+      amount: [amount,currency]
+    }
+  }
+  return this._request('POST','/api/v2/currencies/'+currency+'/deposits',null,JSON.stringify(payload),true);
+}
+
+// https://api.buda.com/#dep-sito-criptomonedas
+Buda.prototype.new_crypto_address = function(currency) {
+  return this._request('POST','/api/v2/currencies/'+currency+'/receive_addresses',null,null,true);
+}
+Buda.prototype.get_address = function(currency, address_id) {
+  var addr='';
+  if(address_id) addr='/'+address_id;
+  return this._request('GET','/api/v2/currencies/'+currency+'/receive_addresses'+addr,null,null,true);
+}
+
+// https://api.buda.com/#crear-nueva-api-key (ERROR: "Forbidden")
+Buda.prototype.new_apikey = function(name, expiration_time) {
+  var payload={
+    api_key: {
+      name: name,
+      expiration_time: expiration_time
+    }
+  }
+  return this._request('POST','/api/v2/api_keys',null,JSON.stringify(payload),true);
+}
 
 module.exports = Buda;
