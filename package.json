@@ -1,0 +1,42 @@
+{
+  "name": "buda-promise",
+  "version": "0.1.0",
+  "description": "buda.com REST API wrapper using Bluebird promises",
+  "keywords": [
+    "buda",
+    "btc",
+    "clp",
+    "eth",
+    "bch",
+    "bitcoin",
+    "ethereum",
+    "bluebird",
+    "promise",
+    "rest",
+    "api",
+    "wrapper"
+  ],
+  "author": {
+    "name": "Andres Junge <ajunge@gmail.com>"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1",
+    "underscore": "1.8.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajunge/buda-promise"
+  },
+  "main": "buda.js",
+  "engines": {
+    "node": ">=4"
+  },
+  "bugs": {
+    "url": "https://github.com/ajunge/buda-promise/issues",
+    "email": "ajunge@gmail.com"
+  },
+  "readmeFilename": "README.md"
+}
