@@ -128,7 +128,7 @@ Buda.prototype.markets = function() {
 
 //
 // Private API
-// (you need to have key / secret / client ID set)
+// (you need to have api_key / api_secret)
 //
 
 // https://api.buda.com/#balances
