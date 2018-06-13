@@ -48,6 +48,8 @@ Buda.prototype._request = function(method, path, args, data, auth=false) {
     options.headers =Object.assign(options.headers, authHeader);
   }
 
+  console.log(options)
+
   return requestPromise(options)
     .then(function(res) {
       return JSON.parse(res.body);
@@ -124,7 +126,7 @@ Buda.prototype.trades = function(market, timestamp) {
 
 // https://api.buda.com/#markets
 Buda.prototype.markets = function() {
-  return this._request('GET','/api/v2/markets/');
+  return this._request('GET','/api/v2/markets');
 }
 
 //
