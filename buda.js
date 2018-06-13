@@ -48,7 +48,7 @@ Buda.prototype._request = function(method, path, args, data, auth=false) {
     options.headers =Object.assign(options.headers, authHeader);
   }
 
-  console.log(options)
+  //console.log(options)
 
   return requestPromise(options)
     .then(function(res) {
