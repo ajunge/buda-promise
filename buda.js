@@ -34,6 +34,7 @@ Buda.prototype._request = function(method, path, args, data, auth=false) {
     },
     timeout: 5000,
     resolveWithFullResponse: true,
+    json: true
   };
 
   if (data) {
@@ -52,7 +53,7 @@ Buda.prototype._request = function(method, path, args, data, auth=false) {
 
   return requestPromise(options)
     .then(function(res) {
-      return JSON.parse(res.body);
+      return res.body;
     }).catch(function(err) {
       let message;
       if (err.name === 'StatusCodeError') {
@@ -162,7 +163,7 @@ Buda.prototype.new_order = function(market, type, price_type, limit, amount) {
       amount: amount
     }
   }
-  return this._request('POST','/api/v2/markets/'+market+'/orders',null,JSON.stringify(payload),true);
+  return this._request('POST','/api/v2/markets/'+market+'/orders',null,payload,true);
 }
 
 // https://api.buda.com/#cancelar-orden
@@ -170,7 +171,7 @@ Buda.prototype.cancel_order = function(order_id) {
   var payload={
     state: "canceling"
   }
-  return this._request('PUT','/api/v2/orders/'+order_id,null,JSON.stringify(payload),true);
+  return this._request('PUT','/api/v2/orders/'+order_id,null,payload,true);
 }
 
 // https://api.buda.com/#estado-de-la-orden
@@ -198,7 +199,7 @@ Buda.prototype.withdrawal = function(currency, amount, target_address) {
       }
     }
   }
-  return this._request('POST','/api/v2/currencies/'+currency+'/withdrawals',null,JSON.stringify(payload),true);
+  return this._request('POST','/api/v2/currencies/'+currency+'/withdrawals',null,payload,true);
 }
 
 // https://api.buda.com/#dep-sito-dinero-fiat (ERROR: "Parameter missing??")
@@ -208,7 +209,7 @@ Buda.prototype.new_fiat_deposit = function(currency, amount) {
       amount: [amount,currency.toUpperCase()]
     }
   }
-  return this._request('POST','/api/v2/currencies/'+currency+'/deposits',null,JSON.stringify(payload),true);
+  return this._request('POST','/api/v2/currencies/'+currency+'/deposits',null,payload,true);
 }
 
 // https://api.buda.com/#dep-sito-criptomonedas
@@ -229,7 +230,7 @@ Buda.prototype.new_apikey = function(name, expiration_time) {
       expiration_time: expiration_time
     }
   }
-  return this._request('POST','/api/v2/api_keys',null,JSON.stringify(payload),true);
+  return this._request('POST','/api/v2/api_keys',null,payload,true);
 }
 
 module.exports = Buda;
