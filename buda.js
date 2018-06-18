@@ -37,7 +37,7 @@ Buda.prototype._request = function(method, path, args, data, auth=false) {
   };
 
   if (data) {
-    options.form = data;
+    options.body = data;
   }
 
   if(auth){
@@ -152,7 +152,7 @@ Buda.prototype.order_pages = function(market, per, page, state, minimun_exchange
   return this._request('GET','/api/v2/markets/'+market+'/orders',args,null,true);
 }
 
-// https://api.buda.com/#nueva-orden (ERROR "Parameter Missing ??")
+// https://api.buda.com/#nueva-orden
 Buda.prototype.new_order = function(market, type, price_type, limit, amount) {
   var payload={
     order: {
@@ -187,7 +187,7 @@ Buda.prototype.withdrawals = function(currency) {
   return this._request('GET','/api/v2/currencies/'+currency+'/withdrawals',null,null,true);
 }
 
-// https://api.buda.com/#nuevo-retiro (ERROR: "Parameter missing??")
+// https://api.buda.com/#nuevo-retiro
 Buda.prototype.withdrawal = function(currency, amount, target_address) {
   var payload={
     withdrawal: {
@@ -205,7 +205,7 @@ Buda.prototype.withdrawal = function(currency, amount, target_address) {
 Buda.prototype.new_fiat_deposit = function(currency, amount) {
   var payload={
     deposit: {
-      amount: [amount,currency]
+      amount: [amount,currency.toUpperCase()]
     }
   }
   return this._request('POST','/api/v2/currencies/'+currency+'/deposits',null,JSON.stringify(payload),true);
