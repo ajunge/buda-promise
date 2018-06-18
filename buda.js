@@ -39,7 +39,7 @@ Buda.prototype._request = function(method, path, args, data, auth=false) {
   if (data) {
     options.form = data;
   }
-  
+
   if(auth){
     if(!this.api_key || !this.api_secret)
       return Promise.reject('Must provide api_key and api_secret to make this API request.');
@@ -63,19 +63,19 @@ Buda.prototype._request = function(method, path, args, data, auth=false) {
       throw new Error(message);
     });
   }
-  
+
   // if you call new Date to fast it will generate
   // the same ms, helper to make sure the nonce is
   // truly unique (supports up to 999 calls per ms).
   Buda.prototype._generateNonce = function() {
     var now = new Date().getTime();
-  
+
     if(now !== this.last)
       this.nonceIncr = -1;
-  
+
     this.last = now;
     this.nonceIncr++;
-  
+
     // add padding to nonce incr
     // @link https://stackoverflow.com/questions/6823592/numbers-in-the-form-of-001
     var padding =
@@ -104,7 +104,7 @@ Buda.prototype._request = function(method, path, args, data, auth=false) {
     };
 
   }
-  
+
 //
 // Public API
 //
@@ -175,7 +175,7 @@ Buda.prototype.cancel_order = function(order_id) {
 
 // https://api.buda.com/#estado-de-la-orden
 Buda.prototype.single_order = function(order_id) {
-  return this._request('GET','/api/v2/orders/'+order_id,null,null,true);  
+  return this._request('GET','/api/v2/orders/'+order_id,null,null,true);
 
 }
 
