@@ -202,7 +202,7 @@ Buda.prototype.withdrawal = function(currency, amount, target_address) {
   return this._request('POST','/api/v2/currencies/'+currency+'/withdrawals',null,payload,true);
 }
 
-// https://api.buda.com/#dep-sito-dinero-fiat (ERROR: "Parameter missing??")
+// https://api.buda.com/#dep-sito-dinero-fiat
 Buda.prototype.new_fiat_deposit = function(currency, amount) {
   var payload={
     deposit: {
