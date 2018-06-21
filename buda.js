@@ -90,7 +90,7 @@ Buda.prototype._request = function(method, path, args, data, auth=false) {
     var nonce = this._generateNonce();
     var message;
     if(body){
-      var base64_encoded_body=Buffer.from(body).toString('base64')
+      var base64_encoded_body=Buffer.from(JSON.stringify(body)).toString('base64')
       message=method+' '+path+' '+base64_encoded_body+' '+nonce
     }else{
       message=method+' '+path+' '+nonce
