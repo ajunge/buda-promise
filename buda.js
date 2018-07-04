@@ -234,15 +234,4 @@ Buda.prototype.get_address = function(currency, address_id) {
   return this._request('GET','/api/v2/currencies/'+currency+'/receive_addresses'+addr,null,null,true);
 }
 
-// https://api.buda.com/#crear-nueva-api-key (ERROR: "Forbidden")
-Buda.prototype.new_apikey = function(name, expiration_time) {
-  var payload={
-    api_key: {
-      name: name,
-      expiration_time: expiration_time
-    }
-  }
-  return this._request('POST','/api/v2/api_keys',null,payload,true);
-}
-
 module.exports = Buda;
