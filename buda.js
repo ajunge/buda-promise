@@ -57,7 +57,7 @@ Buda.prototype._request = function(method, path, args, data, auth=false) {
     }).catch(function(err) {
       let message;
       if (err.name === 'StatusCodeError') {
-        message = 'Buda error ' + err.statusCode + ': ' + (err.statusCode === 404 ? 'Not found' : err.response.body);
+        message = 'Buda error ' + err.statusCode + ': ' + (err.statusCode === 404 ? 'Not found' : JSON.stringify(err.response.body));
       } else {
         message = 'Buda error: ' + err.message;
       }
