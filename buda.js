@@ -181,11 +181,23 @@ Buda.prototype.single_order = function(order_id) {
 }
 
 // https://api.buda.com/#historial-de-depositos-retiros
-Buda.prototype.deposits = function(currency) {
-  return this._request('GET','/api/v2/currencies/'+currency+'/deposits',null,null,true);
+Buda.prototype.deposits = function(currency, per, page, state) {
+  var args={
+    per: per,
+    page: page,
+    state: state,
+  }
+
+  return this._request('GET','/api/v2/currencies/'+currency+'/deposits',args,null,true);
 }
-Buda.prototype.withdrawals = function(currency) {
-  return this._request('GET','/api/v2/currencies/'+currency+'/withdrawals',null,null,true);
+Buda.prototype.withdrawals = function(currency, per, page, state) {
+  var args={
+    per: per,
+    page: page,
+    state: state,
+  }
+
+  return this._request('GET','/api/v2/currencies/'+currency+'/withdrawals',args,null,true);
 }
 
 // https://api.buda.com/#nuevo-retiro
