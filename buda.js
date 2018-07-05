@@ -34,12 +34,13 @@ Buda.prototype._request = function(method, path, args, data, auth=false) {
     },
     timeout: 5000,
     resolveWithFullResponse: true,
+    json: true
   };
 
   if (data) {
-    options.form = data;
+    options.body = data;
   }
-  
+
   if(auth){
     if(!this.api_key || !this.api_secret)
       return Promise.reject('Must provide api_key and api_secret to make this API request.');
@@ -52,30 +53,30 @@ Buda.prototype._request = function(method, path, args, data, auth=false) {
 
   return requestPromise(options)
     .then(function(res) {
-      return JSON.parse(res.body);
+      return res.body;
     }).catch(function(err) {
       let message;
       if (err.name === 'StatusCodeError') {
-        message = 'Buda error ' + err.statusCode + ': ' + (err.statusCode === 404 ? 'Not found' : err.response.body);
+        message = 'Buda error ' + err.statusCode + ': ' + (err.statusCode === 404 ? 'Not found' : JSON.stringify(err.response.body));
       } else {
         message = 'Buda error: ' + err.message;
       }
       throw new Error(message);
     });
   }
-  
+
   // if you call new Date to fast it will generate
   // the same ms, helper to make sure the nonce is
   // truly unique (supports up to 999 calls per ms).
   Buda.prototype._generateNonce = function() {
     var now = new Date().getTime();
-  
+
     if(now !== this.last)
       this.nonceIncr = -1;
-  
+
     this.last = now;
     this.nonceIncr++;
-  
+
     // add padding to nonce incr
     // @link https://stackoverflow.com/questions/6823592/numbers-in-the-form-of-001
     var padding =
@@ -89,7 +90,7 @@ Buda.prototype._request = function(method, path, args, data, auth=false) {
     var nonce = this._generateNonce();
     var message;
     if(body){
-      var base64_encoded_body=Buffer.from(body).toString('base64')
+      var base64_encoded_body=Buffer.from(JSON.stringify(body)).toString('base64')
       message=method+' '+path+' '+base64_encoded_body+' '+nonce
     }else{
       message=method+' '+path+' '+nonce
@@ -104,7 +105,7 @@ Buda.prototype._request = function(method, path, args, data, auth=false) {
     };
 
   }
-  
+
 //
 // Public API
 //
@@ -152,7 +153,7 @@ Buda.prototype.order_pages = function(market, per, page, state, minimun_exchange
   return this._request('GET','/api/v2/markets/'+market+'/orders',args,null,true);
 }
 
-// https://api.buda.com/#nueva-orden (ERROR "Parameter Missing ??")
+// https://api.buda.com/#nueva-orden
 Buda.prototype.new_order = function(market, type, price_type, limit, amount) {
   var payload={
     order: {
@@ -162,7 +163,7 @@ Buda.prototype.new_order = function(market, type, price_type, limit, amount) {
       amount: amount
     }
   }
-  return this._request('POST','/api/v2/markets/'+market+'/orders',null,JSON.stringify(payload),true);
+  return this._request('POST','/api/v2/markets/'+market+'/orders',null,payload,true);
 }
 
 // https://api.buda.com/#cancelar-orden
@@ -170,24 +171,36 @@ Buda.prototype.cancel_order = function(order_id) {
   var payload={
     state: "canceling"
   }
-  return this._request('PUT','/api/v2/orders/'+order_id,null,JSON.stringify(payload),true);
+  return this._request('PUT','/api/v2/orders/'+order_id,null,payload,true);
 }
 
 // https://api.buda.com/#estado-de-la-orden
 Buda.prototype.single_order = function(order_id) {
-  return this._request('GET','/api/v2/orders/'+order_id,null,null,true);  
+  return this._request('GET','/api/v2/orders/'+order_id,null,null,true);
 
 }
 
 // https://api.buda.com/#historial-de-depositos-retiros
-Buda.prototype.deposits = function(currency) {
-  return this._request('GET','/api/v2/currencies/'+currency+'/deposits',null,null,true);
+Buda.prototype.deposits = function(currency, per, page, state) {
+  var args={
+    per: per,
+    page: page,
+    state: state,
+  }
+
+  return this._request('GET','/api/v2/currencies/'+currency+'/deposits',args,null,true);
 }
-Buda.prototype.withdrawals = function(currency) {
-  return this._request('GET','/api/v2/currencies/'+currency+'/withdrawals',null,null,true);
+Buda.prototype.withdrawals = function(currency, per, page, state) {
+  var args={
+    per: per,
+    page: page,
+    state: state,
+  }
+
+  return this._request('GET','/api/v2/currencies/'+currency+'/withdrawals',args,null,true);
 }
 
-// https://api.buda.com/#nuevo-retiro (ERROR: "Parameter missing??")
+// https://api.buda.com/#nuevo-retiro
 Buda.prototype.withdrawal = function(currency, amount, target_address) {
   var payload={
     withdrawal: {
@@ -198,17 +211,17 @@ Buda.prototype.withdrawal = function(currency, amount, target_address) {
       }
     }
   }
-  return this._request('POST','/api/v2/currencies/'+currency+'/withdrawals',null,JSON.stringify(payload),true);
+  return this._request('POST','/api/v2/currencies/'+currency+'/withdrawals',null,payload,true);
 }
 
-// https://api.buda.com/#dep-sito-dinero-fiat (ERROR: "Parameter missing??")
+// https://api.buda.com/#dep-sito-dinero-fiat
 Buda.prototype.new_fiat_deposit = function(currency, amount) {
   var payload={
     deposit: {
-      amount: [amount,currency]
+      amount: [amount,currency.toUpperCase()]
     }
   }
-  return this._request('POST','/api/v2/currencies/'+currency+'/deposits',null,JSON.stringify(payload),true);
+  return this._request('POST','/api/v2/currencies/'+currency+'/deposits',null,payload,true);
 }
 
 // https://api.buda.com/#dep-sito-criptomonedas
@@ -219,17 +232,6 @@ Buda.prototype.get_address = function(currency, address_id) {
   var addr='';
   if(address_id) addr='/'+address_id;
   return this._request('GET','/api/v2/currencies/'+currency+'/receive_addresses'+addr,null,null,true);
-}
-
-// https://api.buda.com/#crear-nueva-api-key (ERROR: "Forbidden")
-Buda.prototype.new_apikey = function(name, expiration_time) {
-  var payload={
-    api_key: {
-      name: name,
-      expiration_time: expiration_time
-    }
-  }
-  return this._request('POST','/api/v2/api_keys',null,JSON.stringify(payload),true);
 }
 
 module.exports = Buda;
