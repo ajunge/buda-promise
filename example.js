@@ -6,6 +6,8 @@ var publicBuda = new Buda();
 //publicBuda.order_book('btc-clp').then(function(result) { console.log(result) });
 //publicBuda.trades('btc-clp',1528768062310).then(function(result) { console.log(result) });
 //publicBuda.markets().then(function(result) { console.log(result) });
+//publicBuda.fees('btc', 'deposit').then(function(result) { console.log(result) });
+//publicBuda.get_quotation('btc-clp', 'bid_given_earned_base', 0.01).then(function(result) { console.log(result) });
 
 var api_key = 'your-key';
 var api_secret = 'your-secret';
