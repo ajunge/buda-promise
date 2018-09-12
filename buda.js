@@ -130,6 +130,24 @@ Buda.prototype.markets = function() {
   return this._request('GET','/api/v2/markets');
 }
 
+// https://api.buda.com/#costos-de-abonos-retiros
+Buda.prototype.fees = function(currency, type) {
+  return this._request('GET',`/api/v2/currencies/${currency}/fees/${type}`)
+}
+
+// https://api.buda.com/#cotizaciones
+Buda.prototype.get_quotation = function(market, type, amount, limit) {
+  var payload = { 
+    type: type,
+    amount: amount,
+    limit: limit
+  };
+  var url =  '/api/v2/markets/'+market+'/quotations';
+
+  return this._request('POST',url,null,payload,true);
+};
+
+
 //
 // Private API
 // (you need to have api_key / api_secret)
