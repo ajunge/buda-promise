@@ -219,25 +219,23 @@ Buda.prototype.withdrawals = function(currency, per, page, state) {
 }
 
 // https://api.buda.com/#nuevo-retiro
-Buda.prototype.withdrawal = function(currency, amount, target_address) {
+Buda.prototype.withdrawal = function(currency, amount, target_address, simulate) {
   var payload={
-    withdrawal: {
-      amount: amount,
-      currency: currency,
-      withdrawal_data: {
-        target_address: target_address
-      }
+    amount: amount,
+    currency: currency,
+    simulate: simulate || false,
+    withdrawal_data: {
+      target_address: target_address
     }
   }
   return this._request('POST','/api/v2/currencies/'+currency+'/withdrawals',null,payload,true);
 }
 
 // https://api.buda.com/#dep-sito-dinero-fiat
-Buda.prototype.new_fiat_deposit = function(currency, amount) {
+Buda.prototype.new_fiat_deposit = function(currency, amount, simulate) {
   var payload={
-    deposit: {
-      amount: [amount,currency.toUpperCase()]
-    }
+    amount: amount,
+    simulate: simulate || false
   }
   return this._request('POST','/api/v2/currencies/'+currency+'/deposits',null,payload,true);
 }
