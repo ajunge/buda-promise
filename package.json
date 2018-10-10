@@ -1,6 +1,6 @@
 {
   "name": "buda-promise",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "buda.com REST API wrapper using Bluebird promises",
   "keywords": [
     "buda",
