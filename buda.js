@@ -231,6 +231,19 @@ Buda.prototype.withdrawal = function(currency, amount, target_address, simulate)
   return this._request('POST','/api/v2/currencies/'+currency+'/withdrawals',null,payload,true);
 }
 
+// https://api.buda.com/#nuevo-retiro-lightning
+Buda.prototype.lightning_withdrawal = function(amount, invoice, simulate) {
+  var payload={
+    amount: amount,
+    simulate: simulate || false,
+    reserve_code: 'ln-btc',
+    withdrawal_data: {
+      payment_request: invoice,
+    }
+  }
+  return this._request('POST','/api/v2/currencies/btc/withdrawals',null,payload,true);
+}
+
 // https://api.buda.com/#dep-sito-dinero-fiat
 Buda.prototype.new_fiat_deposit = function(currency, amount, simulate) {
   var payload={
