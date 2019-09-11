@@ -153,6 +153,11 @@ Buda.prototype.get_quotation = function(market, type, amount, limit) {
 // (you need to have api_key / api_secret)
 //
 
+// Undocumented
+Buda.prototype.me = function() {
+  return this._request('GET','/api/v2/me',null,null,true);
+}
+
 // https://api.buda.com/#balances
 Buda.prototype.balance = function(currency) {
   var curr='';
