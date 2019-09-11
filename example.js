@@ -15,6 +15,7 @@ var privateBuda = new Buda(api_key, api_secret);
 
 //    commented out for your protection
 
+//privateBuda.me().then(function(result) { console.log(result) });
 //privateBuda.balance('clp').then(function(result) { console.log(result) });
 //privateBuda.order_pages('btc-clp').then(function(result) { console.log(result) });
 //privateBuda.new_order("btc-clp", "bid", "limit", 835875, 0.05).then(function(result) { console.log(result) });
