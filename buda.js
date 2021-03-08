@@ -166,12 +166,11 @@ Buda.prototype.balance = function(currency) {
 }
 
 // https://api.buda.com/#mis-rdenes
-Buda.prototype.order_pages = function(market, per, page, state, minimun_exchanged) {
+Buda.prototype.order_pages = function(market, per, page, state) {
   var args={
     per: per,
     page: page,
-    state: state,
-    minimun_exchanged: minimun_exchanged
+    state: state
   }
   return this._request('GET','/api/v2/markets/'+market+'/orders',args,null,true);
 }
@@ -201,6 +200,14 @@ Buda.prototype.cancel_order = function(order_id) {
 Buda.prototype.single_order = function(order_id) {
   return this._request('GET','/api/v2/orders/'+order_id,null,null,true);
 
+}
+
+// https://api.buda.com/#lote-de-ordenes
+Buda.prototype.batch_orders = function(diff) {
+  var payload={
+    diff: diff
+  }
+  return this._request('POST','/api/v2/orders',null,payload,true);
 }
 
 // https://api.buda.com/#historial-de-depositos-retiros
