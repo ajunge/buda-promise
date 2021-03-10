@@ -15,9 +15,10 @@ _.mixin({
   }
 });
 
-var Buda = function(api_key, api_secret) {
+var Buda = function(api_key, api_secret, base_url='https://www.buda.com') {
   this.api_key = api_key;
   this.api_secret = api_secret;
+  this.base_url = base_url;
 
   _.bindAll.apply(_, [this].concat(_.functions(this)));
 }
@@ -26,7 +27,7 @@ Buda.prototype._request = function(method, path, args, data, auth=false) {
   var fullPath = path + (querystring.stringify(args) === '' ? '' : '?') + querystring.stringify(args);
 
   var options = {
-    uri: 'https://www.buda.com' + fullPath,
+    uri: this.base_url + fullPath,
     method: method,
     headers: {
       'User-Agent': 'Mozilla/4.0 (compatible; buda-promise Node.js client)',
@@ -166,12 +167,11 @@ Buda.prototype.balance = function(currency) {
 }
 
 // https://api.buda.com/#mis-rdenes
-Buda.prototype.order_pages = function(market, per, page, state, minimun_exchanged) {
+Buda.prototype.order_pages = function(market, per, page, state) {
   var args={
     per: per,
     page: page,
-    state: state,
-    minimun_exchanged: minimun_exchanged
+    state: state
   }
   return this._request('GET','/api/v2/markets/'+market+'/orders',args,null,true);
 }
@@ -201,6 +201,14 @@ Buda.prototype.cancel_order = function(order_id) {
 Buda.prototype.single_order = function(order_id) {
   return this._request('GET','/api/v2/orders/'+order_id,null,null,true);
 
+}
+
+// https://api.buda.com/#lote-de-ordenes
+Buda.prototype.batch_orders = function(diff) {
+  var payload={
+    diff: diff
+  }
+  return this._request('POST','/api/v2/orders',null,payload,true);
 }
 
 // https://api.buda.com/#historial-de-depositos-retiros
