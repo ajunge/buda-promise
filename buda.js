@@ -256,7 +256,7 @@ Buda.prototype.lightning_withdrawal = function(amount, invoice, simulate) {
   return this._request('POST','/api/v2/reserves/ln-btc/withdrawals',null,payload,true);
 }
 
-// https://api.buda.com/#nuevo-retiro-lightning
+// https://api.buda.com/#nuevo-abono-lightning
 Buda.prototype.lightning_network_invoices = function(amount, currency, memo, expiry_seconds) {
   var payload={
     amount_satoshis: amount,
