@@ -27,3 +27,4 @@ var privateBuda = new Buda(api_key, api_secret);
 //privateBuda.new_fiat_deposit('CLP', 250000).then(function(result) { console.log(result) }); 
 //privateBuda.new_crypto_address('BTC').then(function(result) { console.log(result) });
 //privateBuda.get_address('BTC',30216).then(function(result) { console.log(result) });
+//privateBuda.lightning_network_invoices(1000, "BTC", "message", false).then(function(result) { console.log(result) });

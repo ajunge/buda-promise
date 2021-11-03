@@ -248,13 +248,23 @@ Buda.prototype.withdrawal = function(currency, amount, target_address, simulate)
 Buda.prototype.lightning_withdrawal = function(amount, invoice, simulate) {
   var payload={
     amount: amount,
-    simulate: simulate || false,
-    reserve_code: 'ln-btc',
     withdrawal_data: {
       payment_request: invoice,
-    }
+    },
+    simulate: simulate || false,
   }
-  return this._request('POST','/api/v2/currencies/btc/withdrawals',null,payload,true);
+  return this._request('POST','/api/v2/reserves/ln-btc/withdrawals',null,payload,true);
+}
+
+// https://api.buda.com/#nuevo-abono-lightning
+Buda.prototype.lightning_network_invoices = function(amount, currency, memo, expiry_seconds) {
+  var payload={
+    amount_satoshis: amount,
+    currency: currency,
+    memo: memo,
+    expiry_seconds: expiry_seconds || false
+  }
+  return this._request('POST','/api/v2/lightning_network_invoices',null,payload,true);
 }
 
 // https://api.buda.com/#dep-sito-dinero-fiat
