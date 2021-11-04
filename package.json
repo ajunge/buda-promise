@@ -22,7 +22,7 @@
     "bluebird": "^3.5.0",
     "request": "^2.81.0",
     "request-promise": "^4.2.1",
-    "underscore": "1.8.3"
+    "underscore": "1.12.1"
   },
   "repository": {
     "type": "git",
