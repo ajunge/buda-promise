@@ -197,6 +197,15 @@ Buda.prototype.cancel_order = function(order_id) {
   return this._request('PUT','/api/v2/orders/'+order_id,null,payload,true);
 }
 
+// https://api.buda.com/#rest-api-llamadas-privadas-cancelar-todas-mis-ordenes
+Buda.prototype.cancel_orders = function(market, type) {
+	var payload={
+    market: market,
+    type: type
+  }
+  return this._request('DELETE','/api/v2/orders',null,payload,true);
+}
+
 // https://api.buda.com/#estado-de-la-orden
 Buda.prototype.single_order = function(order_id) {
   return this._request('GET','/api/v2/orders/'+order_id,null,null,true);
