@@ -122,8 +122,12 @@ Buda.prototype.order_book = function(market) {
 }
 
 // https://api.buda.com/#trades
-Buda.prototype.trades = function(market, timestamp) {
-  return this._request('GET','/api/v2/markets/'+market+'/trades',{timestamp: timestamp});
+Buda.prototype.trades = function(market, timestamp, limit) {
+	var payload = { 
+    timestamp: timestamp,
+    limit: limit
+  };
+  return this._request('GET','/api/v2/markets/'+market+'/trades',payload);
 }
 
 // https://api.buda.com/#markets
