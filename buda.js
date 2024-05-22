@@ -121,6 +121,11 @@ Buda.prototype.order_book = function(market) {
   return this._request('GET','/api/v2/markets/'+market+'/order_book');
 }
 
+// https://api.buda.com/#rest-api-llamadas-publicas-volumen-transado
+Buda.prototype.volume = function(market) {
+  return this._request('GET','/api/v2/markets/'+market+'/volume');
+}
+
 // https://api.buda.com/#trades
 Buda.prototype.trades = function(market, timestamp, limit) {
 	var payload = { 
