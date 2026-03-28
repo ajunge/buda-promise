@@ -19,8 +19,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
 
       - run: npm ci
+
+      - name: Remove token auth to allow OIDC trusted publishing
+        run: npm config delete //registry.npmjs.org/:_authToken
 
       - name: Determine version bump
         id: bump
