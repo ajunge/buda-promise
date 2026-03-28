@@ -73,6 +73,10 @@ buda.lightning_withdrawal(amount, invoice, simulate)
 buda.lightning_network_invoices(amount, currency, memo, expiry_seconds)
 ```
 
+## Related
+
+- [buda-cli](https://www.npmjs.com/package/buda-cli) — command line interface for buda.com built on top of this package
+
 ## License
 
 MIT
