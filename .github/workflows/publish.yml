@@ -9,25 +9,61 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
+      contents: write
       id-token: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
+
       - run: npm ci
-      - name: Check if version changed
-        id: version_check
+
+      - name: Determine version bump
+        id: bump
         run: |
-          LOCAL=$(node -p "require('./package.json').version")
-          PUBLISHED=$(npm view buda-promise version 2>/dev/null || echo "0.0.0")
-          echo "local=$LOCAL, published=$PUBLISHED"
-          if [ "$LOCAL" != "$PUBLISHED" ]; then
-            echo "should_publish=true" >> $GITHUB_OUTPUT
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"%s%n%b")
           else
-            echo "should_publish=false" >> $GITHUB_OUTPUT
+            COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:"%s%n%b")
           fi
+
+          # Skip if there are no new commits worth releasing
+          if [ -z "$COMMITS" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Skip if last commit is itself a version bump
+          if git log -1 --pretty=format:"%s" | grep -q "^chore: release"; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          BUMP=patch
+          if echo "$COMMITS" | grep -qE "^feat(\(.+\))?[!]?:"; then
+            BUMP=minor
+          fi
+          if echo "$COMMITS" | grep -qE "BREAKING CHANGE|^[a-z]+(\(.+\))?!:"; then
+            BUMP=major
+          fi
+
+          echo "bump=$BUMP" >> $GITHUB_OUTPUT
+          echo "skip=false" >> $GITHUB_OUTPUT
+
+      - name: Bump version and push tag
+        if: steps.bump.outputs.skip == 'false'
+        run: |
+          git config user.email "github-actions@github.com"
+          git config user.name "github-actions"
+          npm version ${{ steps.bump.outputs.bump }} -m "chore: release %s [skip ci]"
+          git push origin main --follow-tags
+
       - name: Publish
-        if: steps.version_check.outputs.should_publish == 'true'
+        if: steps.bump.outputs.skip == 'false'
         run: npm publish --provenance --access public
