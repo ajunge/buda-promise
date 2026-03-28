@@ -64,6 +64,14 @@ jobs:
           npm version ${{ steps.bump.outputs.bump }} -m "chore: release %s [skip ci]"
           git push origin main --follow-tags
 
-      - name: Publish
+      - name: Publish to npm
         if: steps.bump.outputs.skip == 'false'
         run: npm publish --provenance --access public
+
+      - name: Create GitHub release
+        if: steps.bump.outputs.skip == 'false'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          gh release create "v${VERSION}" --generate-notes --title "v${VERSION}"
