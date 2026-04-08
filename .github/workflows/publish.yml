@@ -20,7 +20,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
       - run: npm ci
@@ -54,9 +54,7 @@ jobs:
           git push --follow-tags
 
       - name: Publish to npm
-        run: |
-          rm -f "$NPM_CONFIG_USERCONFIG"
-          npm publish --provenance --access public --registry https://registry.npmjs.org
+        run: npm publish --provenance --access public
 
       - name: Create GitHub release
         env:
