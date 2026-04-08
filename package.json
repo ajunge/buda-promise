@@ -1,6 +1,6 @@
 {
   "name": "buda-promise",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "buda.com REST API wrapper using promises",
   "keywords": [
     "buda",
