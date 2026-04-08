@@ -55,8 +55,8 @@ jobs:
 
       - name: Publish to npm
         run: |
-          npm config delete //registry.npmjs.org/:_authToken
-          npm publish --provenance --access public
+          rm -f "$NPM_CONFIG_USERCONFIG"
+          npm publish --provenance --access public --registry https://registry.npmjs.org
 
       - name: Create GitHub release
         env:
