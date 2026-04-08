@@ -117,6 +117,11 @@ Buda.prototype.ticker = function(market) {
   return this._request('GET', '/api/v2/markets/' + market + '/ticker');
 }
 
+// https://api.buda.com/#tickers
+Buda.prototype.tickers = function() {
+  return this._request('GET', '/api/v2/tickers');
+}
+
 // https://api.buda.com/#order-book
 Buda.prototype.order_book = function(market) {
   return this._request('GET', '/api/v2/markets/' + market + '/order_book');
@@ -139,6 +144,11 @@ Buda.prototype.trades = function(market, timestamp, limit) {
 // https://api.buda.com/#markets
 Buda.prototype.markets = function() {
   return this._request('GET', '/api/v2/markets');
+}
+
+// https://api.buda.com/#detalle-de-mercado
+Buda.prototype.market = function(market) {
+  return this._request('GET', '/api/v2/markets/' + market);
 }
 
 // https://api.buda.com/#costos-de-abonos-retiros
@@ -187,14 +197,15 @@ Buda.prototype.order_pages = function(market, per, page, state) {
 }
 
 // https://api.buda.com/#nueva-orden
-Buda.prototype.new_order = function(market, type, price_type, limit, amount) {
+Buda.prototype.new_order = function(market, type, price_type, limit, amount, client_id) {
   var payload = {
-    order: {
+    order: _.compactObject({
       type: type,
       price_type: price_type,
       limit: limit,
-      amount: amount
-    }
+      amount: amount,
+      client_id: client_id
+    })
   }
   return this._request('POST', '/api/v2/markets/' + market + '/orders', null, payload, true);
 }
@@ -229,6 +240,19 @@ Buda.prototype.batch_orders = function(diff) {
   return this._request('POST', '/api/v2/orders', null, payload, true);
 }
 
+// https://api.buda.com/#orden-por-client-id
+Buda.prototype.order_by_client_id = function(client_id) {
+  return this._request('GET', '/api/v2/orders/by-client-id/' + client_id, null, null, true);
+}
+
+// https://api.buda.com/#cancelar-orden-por-client-id
+Buda.prototype.cancel_order_by_client_id = function(client_id) {
+  var payload = {
+    state: "canceling"
+  }
+  return this._request('PUT', '/api/v2/orders/by-client-id/' + client_id, null, payload, true);
+}
+
 // https://api.buda.com/#historial-de-depositos-retiros
 Buda.prototype.deposits = function(currency, per, page, state) {
   var args = {
@@ -250,7 +274,7 @@ Buda.prototype.withdrawals = function(currency, per, page, state) {
 }
 
 // https://api.buda.com/#nuevo-retiro
-Buda.prototype.withdrawal = function(currency, amount, target_address, simulate) {
+Buda.prototype.new_crypto_withdrawal = function(currency, amount, target_address, simulate) {
   var payload = {
     amount: amount,
     currency: currency,
@@ -258,6 +282,15 @@ Buda.prototype.withdrawal = function(currency, amount, target_address, simulate)
     withdrawal_data: {
       target_address: target_address
     }
+  }
+  return this._request('POST', '/api/v2/currencies/' + currency + '/withdrawals', null, payload, true);
+}
+
+// https://api.buda.com/#retiro-dinero-fiat
+Buda.prototype.new_fiat_withdrawal = function(currency, amount, simulate) {
+  var payload = {
+    amount: amount,
+    simulate: simulate || false
   }
   return this._request('POST', '/api/v2/currencies/' + currency + '/withdrawals', null, payload, true);
 }
@@ -302,6 +335,56 @@ Buda.prototype.get_address = function(currency, address_id) {
   var addr = '';
   if (address_id) addr = '/' + address_id;
   return this._request('GET', '/api/v2/currencies/' + currency + '/receive_addresses' + addr, null, null, true);
+}
+
+//
+// Cross Border Payments API
+//
+
+// https://api.buda.com/#nueva-remesa
+Buda.prototype.quote_remittance = function(params) {
+  var payload = {
+    origin_amount: params.origin_amount,
+    destination_amount: params.destination_amount,
+    origin_currency: params.origin_currency,
+    destination_currency: params.destination_currency,
+    client_reference_id: params.client_reference_id,
+    recipient_data: params.recipient_data
+  }
+  return this._request('POST', '/api/v2/remittances', null, _.compactObject(payload), true);
+}
+
+// https://api.buda.com/#aceptar-remesa
+Buda.prototype.accept_remittance = function(remittance_id) {
+  return this._request('POST', '/api/v2/remittances/' + remittance_id + '/accept', null, null, true);
+}
+
+// https://api.buda.com/#detalle-de-remesa
+Buda.prototype.remittance = function(remittance_id) {
+  return this._request('GET', '/api/v2/remittances/' + remittance_id, null, null, true);
+}
+
+// https://api.buda.com/#listar-remesas
+Buda.prototype.remittances = function(per, page) {
+  var args = {
+    per: per,
+    page: page
+  }
+  return this._request('GET', '/api/v2/remittances', args, null, true);
+}
+
+// https://api.buda.com/#listar-destinatarios
+Buda.prototype.remittance_recipients = function(per, page) {
+  var args = {
+    per: per,
+    page: page
+  }
+  return this._request('GET', '/api/v2/remittance_recipients', args, null, true);
+}
+
+// https://api.buda.com/#detalle-de-destinatario
+Buda.prototype.remittance_recipient = function(recipient_id) {
+  return this._request('GET', '/api/v2/remittance_recipients/' + recipient_id, null, null, true);
 }
 
 module.exports = Buda;

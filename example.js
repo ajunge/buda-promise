@@ -24,7 +24,7 @@ var privateBuda = new Buda(api_key, api_secret);
 //privateBuda.single_order(588).then(function(result) { console.log(result) });
 //privateBuda.deposits('clp').then(function(result) { console.log(result) });
 //privateBuda.withdrawals('clp').then(function(result) { console.log(result) });
-//privateBuda.withdrawal('btc',2.5,'mo366JJaDU5B1hmnPygyjQVMbUKnBC7DsY').then(function(result) { console.log(result) }); 
+//privateBuda.new_crypto_withdrawal('btc',2.5,'mo366JJaDU5B1hmnPygyjQVMbUKnBC7DsY').then(function(result) { console.log(result) });
 //privateBuda.new_fiat_deposit('CLP', 250000).then(function(result) { console.log(result) }); 
 //privateBuda.new_crypto_address('BTC').then(function(result) { console.log(result) });
 //privateBuda.get_address('BTC',30216).then(function(result) { console.log(result) });
