@@ -53,11 +53,10 @@ jobs:
           npm version ${{ steps.bump.outputs.bump }} -m "chore: release %s [skip ci]"
           git push --follow-tags
 
-      - name: Clear conflicting auth token
-        run: npm config set //registry.npmjs.org/:_authToken ""
-
       - name: Publish to npm
-        run: npm publish --provenance --access public
+        run: |
+          npm config delete //registry.npmjs.org/:_authToken
+          npm publish --provenance --access public
 
       - name: Create GitHub release
         env:
